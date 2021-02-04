@@ -4,6 +4,22 @@ use std::thread;
 use std::time::SystemTime;
 use std::vec;
 
+// installer https://rustup.rs/
+// setup used gnu; host triple: x86_64-pc-windows-msvc https://github.com/rust-lang/rustup/issues/2568
+// use default profile https://rust-lang.github.io/rustup/concepts/profiles.html
+// which means debug with CodeLLDB
+//   https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb
+//   https://stackoverflow.com/a/52273254/574370
+// rust standard code extension (poor code completion btw) https://marketplace.visualstudio.com/items?itemName=rust-lang.rust
+// still good to know about this, also for allow breakpoints in every file https://www.forrestthewoods.com/blog/how-to-debug-rust-with-visual-studio-code/
+// genetral getting started
+// dev vs release (optimization) https://doc.rust-lang.org/book/ch14-01-release-profiles.html
+
+// actor system? https://docs.rs/axiom/0.2.1/axiom/
+// printing a vec https://stackoverflow.com/questions/30320083/how-to-print-a-vec
+
+// result verificaton https://primes.utm.edu/nthprime/index.php#nth
+
 struct Batch {
     primes: Arc<vec::Vec<u64>>,
     squares: Arc<vec::Vec<u64>>,
@@ -27,7 +43,7 @@ struct Report {
     squares: vec::Vec<u64>,
     start: u64,
     end: u64,
-    index: usize,
+    index: usize, //https://www.reddit.com/r/rust/comments/8k4vwc/rust_noob_using_a_value_from_an_array_as_an_index/
 }
 
 fn main() {
@@ -35,6 +51,7 @@ fn main() {
     let threads = 12;
 
     let mut working = vec![false; threads];
+    // https://doc.rust-lang.org/book/ch16-02-message-passing.html
     let mut channels = vec::Vec::new();
     let (main_tx, main_rx) = mpsc::channel::<Report>();
 
@@ -114,11 +131,14 @@ fn main() {
         let mut consumed = true;
         while consumed {
             consumed = false;
+            //https://stackoverflow.com/a/46033739/574370
             pending.retain(|report| {
                 let connects = report.start - 1 == top;
                 if connects {
                     didwork = true;
                     consumed = true;
+
+                    // https://stackoverflow.com/a/56490417/574370
                     primes = Arc::new(
                         primes
                             .iter()
@@ -180,6 +200,7 @@ fn prime_from(
                 .zip(squares.iter())
                 .take_while(|(_, &s)| s <= *n)
                 .any(|(p, _)| n % p == 0)
+            // https://doc.rust-lang.org/rust-by-example/fn/closures/closure_examples/iter_any.html
         })
         .collect();
 
