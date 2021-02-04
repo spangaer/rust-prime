@@ -43,7 +43,7 @@ fn main() {
         channels.push(tx);
         let main_tx = main_tx.clone();
         thread::spawn(move || loop {
-            match rx.try_recv() {
+            match rx.recv() {
                 Ok(b) => {
                     let (new_primes, new_squares) =
                         prime_from(&b.primes, &b.squares, b.start, b.end);
@@ -57,8 +57,9 @@ fn main() {
 
                     main_tx.send(report).unwrap()
                 }
-                Err(_) => {
-                    thread::yield_now();
+                Err(e) => {
+                    eprint!("{}", e);
+                    break;
                 }
             }
         });
